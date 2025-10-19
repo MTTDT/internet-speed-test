@@ -1,4 +1,4 @@
-Instructions:
+Instructions:\n
 (no parameters) - shows best server bycurrent location
 -a - gives information of all servers in json
 -o couontry - shows best server by given country
