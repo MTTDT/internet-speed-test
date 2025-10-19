@@ -166,43 +166,59 @@ double get_singular_download_speed( CURL *curl, struct Server server){
     
 }
 double get_singular_upload_speed(CURL *curl, struct Server server){
+
     char url[512];
-    snprintf(url, sizeof(url), "http://%s/speedtest/upload.php", server.host);
+    snprintf(url, sizeof(url), "https://%s/upload", server.host);
   
 
     if (!curl) return 0.0;
     curl_easy_reset(curl);
 
 
-    FILE *src = fopen("upload_test_file.bin", "r");
+    FILE *src = fopen("upload_test_file.bin", "rb");
     if (!src) {
         printf("Error: Unable to open upload file.\n");
         return 0.0;
     }
-    curl_off_t file_size = 20971525;
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L); 
+
+    long file_size = 20971520;
+    char *file_buffer = malloc(file_size);
+
+   
+    fclose(src);
+
+
     curl_easy_setopt(curl, CURLOPT_URL, url);
-    curl_easy_setopt(curl, CURLOPT_READDATA, src);
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_size);
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, file_buffer);
+    
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, file_size);
+
+
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "speedtest/1.0");
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15L); 
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15L);
+
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
 
 
     CURLcode res = curl_easy_perform(curl); 
-    fclose(src);
-
+    free(file_buffer);
     if(res == CURLE_OK) {
         double upload_speed;
-        curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD_T, &upload_speed);
+        curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &upload_speed);
 
         printf("Upload speed: %.2f Mb/s\n", convert_speed(upload_speed));
 
         fflush(stdout);
+
         return upload_speed;
     }else{
         printf("Upload failed: %s\n", curl_easy_strerror(res));
     }
+
     return 0;
 }
 void get_multiple_internet_speed( CURL *curl, struct Servers servers){
@@ -227,11 +243,6 @@ struct ServerWithSpeeds find_best_server_by_location(char* country, char* city, 
     categorised_servers.size = 0;
 
     struct ServerWithSpeeds best_perf_server= {NULL, 0.0, 0.0};
-
-  
-
-
-
 
      if(country == NULL && city == NULL){
         return best_perf_server;
