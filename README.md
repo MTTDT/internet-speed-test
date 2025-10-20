@@ -6,3 +6,5 @@
 - **-s \<id\>** — gives information about server by given id  
 - **-u \<id\>** — gives information about server by given url
 
+- *Upload issue fixed 
+
