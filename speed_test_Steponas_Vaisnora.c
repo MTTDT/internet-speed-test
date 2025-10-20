@@ -192,7 +192,7 @@ double get_singular_upload_speed(CURL *curl, struct Server server){
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, file_buffer);
     
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, file_size);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, file_size);
 
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "speedtest/1.0");
